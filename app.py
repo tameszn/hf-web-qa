@@ -5,12 +5,25 @@ import inspect
 import pandas as pd
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_tavily import TavilySearch
+from langchain.agents import create_agent
+
+
+RULES="""
+Return the final answer with very little/NO explanations or  NO additional sentences 
+Write numbers using digits only,without commas and units unless requested
+do not include the 'final answer:' prefix or trailing period 
+If genuinely unable to answer any question,return 'unknown'
+"""
+def get_text(content):
+    if isinstance(content, str):
+        return content
+    return "".join(p.get("text", "") for p in content if isinstance(p, dict) and p.get("type") == "text")
 
 
 load_dotenv()
 
-# (Keep Constants as is)
-# --- Constants ---
+
 DEFAULT_API_URL = "https://agents-course-unit4-scoring.hf.space"
 
 # --- Basic Agent Definition ---
@@ -18,11 +31,19 @@ DEFAULT_API_URL = "https://agents-course-unit4-scoring.hf.space"
 class BasicAgent:
     def __init__(self):
         print("BasicAgent initialized.")
+
+        self.llm=ChatGoogleGenerativeAI(model="gemini-3.6-flash", temperature=0)
+        self.tools=[TavilySearch(max_results=3)]
+        self.agent=create_agent(model=self.llm,tools=self.tools,system_prompt=RULES)
+
+        
     def __call__(self, question: str) -> str:
         print(f"Agent received question (first 50 chars): {question[:50]}...")
-        fixed_answer = "This is a default answer."
-        print(f"Agent returning fixed answer: {fixed_answer}")
-        return fixed_answer
+        result = self.agent.invoke({"messages": [("user", question)]})
+        answer = get_text(result["messages"][-1].content)
+        answer=answer.strip().rstrip(".").strip()
+        print(answer)
+        return answer if answer else "unknown"
 
 def run_and_submit_all( profile: gr.OAuthProfile | None):
     """
