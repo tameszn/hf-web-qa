@@ -1,0 +1,6 @@
+
+.venv/
+.env
+__pycache__/
+answers_cache.json
+task_files/

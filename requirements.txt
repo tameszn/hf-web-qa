@@ -1,2 +1,10 @@
 gradio
 requests
+python-dotenv
+langchain
+langchain-google-genai
+langchain-tavily
+openpyxl
+gradio[oauth]
+pandas
+spaces

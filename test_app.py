@@ -1,0 +1,3 @@
+from app import BasicAgent
+agent = BasicAgent()
+print(agent("What country had the least number of athletes at the 1928 Summer Olympics? If there's a tie for a number of athletes, return the first in alphabetical order. Give the IOC country code as your answer.."))
